@@ -3,13 +3,13 @@ name: '🧪 E2E Tests - Cypress'
 on:
   workflow_call:
     inputs:
-      record:
-        required: true
-        type: boolean
-        default: true
       provider:
         required: true
         type: string
+      record:
+        required: false
+        type: boolean
+        default: true
     secrets:
       CYPRESS_BASE_URL:
         required: true
