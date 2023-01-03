@@ -19,19 +19,22 @@ on:
         required: true
       VERCEL_PREVIEW_DEPLOYMENT_PASSWORD:
         required: false
+      PERCY_TOKEN:
+        required: false
 
 jobs:
-  # NOTE: ⚠️ this project is currently NOT using Percy
-  #
   # Nonce for re-runs: https://docs.percy.io/docs/parallel-test-suites#github-actions
-  # nonce:
-  #   runs-on: ubuntu-latest
-  #   outputs:
-  #     result: ${{ steps.nonce.outputs.result }}
-  #   steps:
-  #     - id: nonce
-  #       # Don't use deprecated set-output as per https://github.blog/changelog/2022-10-11-github-actions-deprecating-save-state-and-set-output-commands/
-  #       run: echo "result=${{ github.run_id }}-$(date +%s)" >> $GITHUB_OUTPUT
+  nonce:
+    env:
+      percy_token: ${{ secrets.PERCY_TOKEN }}
+    if: ${{ env.percy_token == '' }}
+    runs-on: ubuntu-latest
+    outputs:
+      result: ${{ steps.nonce.outputs.result }}
+    steps:
+      - id: nonce
+        # Don't use deprecated set-output as per https://github.blog/changelog/2022-10-11-github-actions-deprecating-save-state-and-set-output-commands/
+        run: echo "result=${{ github.run_id }}-$(date +%s)" >> $GITHUB_OUTPUT
 
   install-and-cache-dependencies:
     runs-on: ubuntu-latest
@@ -107,6 +110,9 @@ jobs:
           NETLIFY_TOKEN: ${{ secrets.NETLIFY_TOKEN }}
 
   cypress-ui-chrome-tests:
+    env:
+      percy_token: ${{ secrets.PERCY_TOKEN }}
+    if: ${{ env.percy_token == '' }}
     timeout-minutes: 15
     runs-on: ubuntu-latest
     container:
@@ -114,7 +120,6 @@ jobs:
       options: --user 1001
     needs:
       - wait-for-preview
-      # - nonce
     strategy:
       # when one test fails, DO NOT cancel the other
       # containers, because this will kill Cypress processes
@@ -166,9 +171,77 @@ jobs:
           CYPRESS_PROJECT_ID: ${{ secrets.CYPRESS_PROJECT_ID }}
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           VERCEL_JWT: _vercel_jwt=${{ steps.wait-for-preview.outputs.vercel-jwt }}
-          # PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
-          # PERCY_PARALLEL_NONCE: ${{ needs.nonce.outputs.result }}
-          # PERCY_PARALLEL_TOTAL: 5
+          COMMIT_INFO_BRANCH: ${{ github.head_ref }}
+          # Recommended: passing the GitHub token lets this action correctly
+          # determine the unique run id necessary to re-run the checks
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  cypress-ui-chrome-tests-with-snapshots:
+    env:
+      percy_token: ${{ secrets.PERCY_TOKEN }}
+    if: ${{ env.percy_token != '' }}
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    container:
+      image: cypress/browsers:node16.14.0-slim-chrome99-ff97
+      options: --user 1001
+    needs:
+      - wait-for-preview
+      - nonce
+    strategy:
+      # when one test fails, DO NOT cancel the other
+      # containers, because this will kill Cypress processes
+      # leaving the Dashboard hanging ...
+      # https://github.com/cypress-io/github-action/issues/48
+      fail-fast: false
+      matrix:
+        # run copies of the current job in parallel
+        containers: [1, 2, 3, 4, 5]
+
+    steps:
+      ## SETUP
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+
+      - name: '🚀 Dependencies cache'
+        uses: actions/cache@v3
+        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+        with:
+          path: |
+            **/node_modules
+            ~/.cache/Cypress
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: '📦 Install project dependencies'
+        run: yarn --prefer-offline
+
+      - name: '🧪 Website Tests - Chrome'
+        uses: cypress-io/github-action@v4
+        with:
+          install: false
+          project: ./packages/web
+          browser: chrome
+          record: ${{ inputs.record }}
+          parallel: true
+          group: 'UI - Chrome'
+        env:
+          SITE: ${{ secrets.SITE }}
+          CYPRESS_BASE_URL: ${{ needs.wait-for-preview.outputs.preview-url }}
+          CYPRESS_PROJECT_ID: ${{ secrets.CYPRESS_PROJECT_ID }}
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+          VERCEL_JWT: _vercel_jwt=${{ steps.wait-for-preview.outputs.vercel-jwt }}
+          PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
+          PERCY_PARALLEL_NONCE: ${{ needs.nonce.outputs.result }}
+          PERCY_PARALLEL_TOTAL: 5
           COMMIT_INFO_BRANCH: ${{ github.head_ref }}
           # Recommended: passing the GitHub token lets this action correctly
           # determine the unique run id necessary to re-run the checks
