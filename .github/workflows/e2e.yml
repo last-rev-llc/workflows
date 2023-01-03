@@ -32,18 +32,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - id: check-percy-token
-        name: Check if PERCY_TOKEN exists
+        name: Check if Percy token exists
         run: echo "result=${{ secrets.PERCY_TOKEN != '' }}" >> $GITHUB_OUTPUT
 
   nonce:
-    env:
-      percy_token: ${{ secrets.PERCY_TOKEN }}
     runs-on: ubuntu-latest
+    needs:
+      - check-percy-token
+    if: ${{ needs.check-percy-token.outputs.token-exists == true }}
     outputs:
       result: ${{ steps.nonce.outputs.result }}
     steps:
       - id: nonce
-        if: ${{ env.percy_token == '' }}
         # Don't use deprecated set-output as per https://github.blog/changelog/2022-10-11-github-actions-deprecating-save-state-and-set-output-commands/
         run: echo "result=${{ github.run_id }}-$(date +%s)" >> $GITHUB_OUTPUT
 
@@ -109,13 +109,14 @@ jobs:
           NETLIFY_TOKEN: ${{ secrets.NETLIFY_TOKEN }}
 
   cypress-ui-chrome-tests:
-    if: ${{ steps.check-percy-token.outputs.token-exists == false }}
+    if: ${{ needs.check-percy-token.outputs.token-exists == false }}
     timeout-minutes: 15
     runs-on: ubuntu-latest
     container:
       image: cypress/browsers:node16.14.0-slim-chrome99-ff97
       options: --user 1001
     needs:
+      - check-percy-token
       - wait-for-preview
     strategy:
       # when one test fails, DO NOT cancel the other
@@ -174,15 +175,16 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   cypress-ui-chrome-tests-with-snapshots:
-    if: ${{ steps.check-percy-token.outputs.token-exists == true }}
+    if: ${{ needs.check-percy-token.outputs.token-exists == false }}
     timeout-minutes: 15
     runs-on: ubuntu-latest
     container:
       image: cypress/browsers:node16.14.0-slim-chrome99-ff97
       options: --user 1001
     needs:
-      - wait-for-preview
+      - check-percy-token
       - nonce
+      - wait-for-preview
     strategy:
       # when one test fails, DO NOT cancel the other
       # containers, because this will kill Cypress processes
