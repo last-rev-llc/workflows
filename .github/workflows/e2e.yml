@@ -2,6 +2,13 @@ name: '🧪 E2E Tests - Cypress'
 
 on:
   workflow_call:
+    inputs:
+      record:
+        required: true
+        type: boolean
+      provider:
+        required: true
+        type: string
     secrets:
       CYPRESS_BASE_URL:
         required: true
@@ -121,6 +128,7 @@ jobs:
         run: yarn --prefer-offline
 
       - name: '⏳ Wait for Vercel Preview'
+        if: ${{ inputs.provider == 'vercel' }}
         uses: patrickedqvist/wait-for-vercel-preview@v1.2.0
         id: wait-for-vercel-preview
         with:
@@ -128,18 +136,27 @@ jobs:
           max_timeout: 600
           vercel_password: ${{ secrets.VERCEL_PREVIEW_DEPLOYMENT_PASSWORD }}
 
+      - name: '⏳ Wait for Netlify Preview'
+        if: ${{ inputs.provider == 'netlify' }}
+        uses: jlevy-io/wait-for-netlify-deploy-with-headers@3.0.2
+        id: wait-for-netflify-preview
+        with:
+          site_id: ${{ secrets.NETLIFY_SITE_ID }}
+        env:
+          NETLIFY_TOKEN: ${{ secrets.NETLIFY_TOKEN }}
+
       - name: '🧪 Website Tests - Chrome'
         uses: cypress-io/github-action@v4
         with:
           install: false
           project: ./packages/web
           browser: chrome
-          record: true
+          record: ${{ inputs.record }}
           parallel: true
           group: 'UI - Chrome'
         env:
           SITE: ${{ secrets.SITE }}
-          CYPRESS_BASE_URL: ${{ steps.wait-for-vercel-preview.outputs.url }}
+          CYPRESS_BASE_URL: ${{ steps.wait-for-netflify-preview.outputs.url || steps.wait-for-vercel-preview.outputs.url }}
           CYPRESS_PROJECT_ID: ${{ secrets.CYPRESS_PROJECT_ID }}
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           VERCEL_JWT: _vercel_jwt=${{ steps.wait-for-vercel-preview.outputs.vercel_jwt }}
