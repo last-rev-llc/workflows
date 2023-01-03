@@ -109,7 +109,7 @@ jobs:
           NETLIFY_TOKEN: ${{ secrets.NETLIFY_TOKEN }}
 
   cypress-ui-chrome-tests:
-    if: ${{ needs.check-percy-token.outputs.token-exists == false }}
+    if: ${{ needs.check-percy-token.outputs.token-exists == 'false' }}
     timeout-minutes: 15
     runs-on: ubuntu-latest
     container:
@@ -175,7 +175,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   cypress-ui-chrome-tests-with-snapshots:
-    if: ${{ needs.check-percy-token.outputs.token-exists == false }}
+    if: ${{ needs.check-percy-token.outputs.token-exists == 'true' }}
     timeout-minutes: 15
     runs-on: ubuntu-latest
     container:
