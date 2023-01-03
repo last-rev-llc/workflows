@@ -11,8 +11,6 @@ on:
         type: boolean
         default: true
     secrets:
-      CYPRESS_BASE_URL:
-        required: true
       CYPRESS_PROJECT_ID:
         required: true
       CYPRESS_RECORD_KEY:
