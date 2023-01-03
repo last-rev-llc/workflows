@@ -18,7 +18,7 @@ on:
       SITE:
         required: true
       VERCEL_PREVIEW_DEPLOYMENT_PASSWORD:
-        required: true
+        required: false
 
 jobs:
   # NOTE: ⚠️ this project is currently NOT using Percy
