@@ -58,7 +58,7 @@ jobs:
       - name: 🔍 Check if Percy token exists
         if: ${{ env.percy-token == '' }}
         run: |
-          echo "::error title=Percy token not set::Percy token not available as secret, please make sure the right one is set on the project."
+          echo "::error title=Percy token not set::Percy token not available as secret, please make sure the right one is set on the project and passed as secret."
           exit 1
       - id: nonce
         # Don't use deprecated set-output as per https://github.blog/changelog/2022-10-11-github-actions-deprecating-save-state-and-set-output-commands/
@@ -72,7 +72,15 @@ jobs:
     container:
       image: cypress/browsers:node16.14.2-slim-chrome103-ff102
       options: --user 1001
+    env:
+      percy-token: ${{ secrets.PERCY_TOKEN }}
     steps:
+      - name: 🕸 Fail if qa-ready without Percy token
+        if: ${{ contains(github.event.pull_request.labels.*.name, 'qa-ready') && env.percy-token == '' }}
+        run: |
+          echo "::error title=Percy token not set::Percy token not available as secret, please make sure the right one is set on the project and passed as secret."
+          exit 1
+
       ## SETUP
       - name: 🛎 Checkout code
         uses: actions/checkout@v3
