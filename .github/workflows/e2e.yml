@@ -50,7 +50,7 @@ jobs:
   install-and-cache-dependencies:
     runs-on: ubuntu-latest
     container:
-      image: cypress/browsers:node16.14.0-slim-chrome99-ff97
+      image: cypress/browsers:node16.14.2-slim-chrome103-ff102
       options: --user 1001
     steps:
       ## SETUP
@@ -113,7 +113,7 @@ jobs:
     timeout-minutes: 15
     runs-on: ubuntu-latest
     container:
-      image: cypress/browsers:node16.14.0-slim-chrome99-ff97
+      image: cypress/browsers:node16.14.2-slim-chrome103-ff102
       options: --user 1001
     needs:
       - check-percy-token
@@ -181,7 +181,7 @@ jobs:
     timeout-minutes: 15
     runs-on: ubuntu-latest
     container:
-      image: cypress/browsers:node16.14.0-slim-chrome99-ff97
+      image: cypress/browsers:node16.14.2-slim-chrome103-ff102
       options: --user 1001
     needs:
       - check-percy-token
