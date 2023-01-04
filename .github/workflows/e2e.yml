@@ -33,7 +33,6 @@ jobs:
       matrix: ${{ steps.save-matrix-value.outputs.result }}
     steps:
       - name: Generate matrix values
-        # run: bash ${PWD}/.github/scripts/generate_matrix.sh ${{ inputs.parallel-jobs }} > matrix.txt
         run: |
           output="["
           for i in $(seq 1 "${{ inputs.parallel-jobs }}"); do
@@ -136,7 +135,6 @@ jobs:
         env:
           NETLIFY_TOKEN: ${{ secrets.NETLIFY_TOKEN }}
 
-
   cypress-ui-chrome-tests:
     if: ${{ needs.check-percy-token.outputs.token-exists == 'false' }}
     needs:
@@ -156,7 +154,7 @@ jobs:
       fail-fast: false
       matrix:
         # run copies of the current job in parallel
-        containers: ${{ needs.generate-matrix.outputs.matrix }}
+        containers: ${{ fromJSON(needs.generate-matrix.outputs.matrix) }}
 
     steps:
       - name: Checkout code
@@ -226,7 +224,7 @@ jobs:
       fail-fast: false
       matrix:
         # run copies of the current job in parallel
-        containers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        containers: ${{ fromJSON(needs.generate-matrix.outputs.matrix) }}
 
     steps:
       # Enforce label on PR to prevent unnecessary testing
