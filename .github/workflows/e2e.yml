@@ -33,7 +33,16 @@ jobs:
       matrix: ${{ steps.save-matrix-value.outputs.result }}
     steps:
       - name: Generate matrix values
-        run: bash ${PWD}/.github/scripts/generate_matrix.sh ${{ inputs.parallel-jobs }} > matrix.txt
+        # run: bash ${PWD}/.github/scripts/generate_matrix.sh ${{ inputs.parallel-jobs }} > matrix.txt
+        run: |
+          output="["
+          for i in $(seq 1 "${{ inputs.parallel-jobs }}"); do
+            output+="$i,"
+          done
+          output=${output%,}
+          output+="]"
+          echo "$output" > matrix.txt
+
       - name: Save matrix value
         id: save-matrix-value
         run: echo "result=$(cat matrix.txt)" >> $GITHUB_OUTPUT
