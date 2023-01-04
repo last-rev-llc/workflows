@@ -135,6 +135,11 @@ jobs:
         env:
           NETLIFY_TOKEN: ${{ secrets.NETLIFY_TOKEN }}
 
+      - if: ${{ inputs.provider != 'vercel' && inputs.provider != 'netlify' }}
+        run: |
+          echo "Invalid provider"
+          exit 1
+
   cypress-ui-chrome-tests:
     if: ${{ needs.check-percy-token.outputs.token-exists == 'false' }}
     needs:
