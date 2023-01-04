@@ -76,7 +76,7 @@ jobs:
       - generate-matrix
     runs-on: ubuntu-latest
     container:
-      image: cypress/browsers:node16.14.2-slim-chrome103-ff102
+      image: cypress/browsers:node16.18.0-chrome107-ff106-edge
       options: --user 1001
     env:
       percy-token: ${{ secrets.PERCY_TOKEN }}
@@ -168,7 +168,7 @@ jobs:
     timeout-minutes: 15
     runs-on: ubuntu-latest
     container:
-      image: cypress/browsers:node16.14.2-slim-chrome103-ff102
+      image: cypress/browsers:node16.18.0-chrome107-ff106-edge
       options: --user 1001
     strategy:
       # when one test fails, DO NOT cancel the other
@@ -211,12 +211,11 @@ jobs:
         id: decrypt-vercel-jwt
         env:
           PASSPHRASE: ${{ secrets.PGP_SECRET_SIGNING_PASSPHRASE }}
-          JWT: ${{ needs.wait-for-preview.outputs.encrypted-vercel-jwt }}
+          ENCRYPTED_JWT: ${{ needs.wait-for-preview.outputs.encrypted-vercel-jwt }}
         run: |
-          decrypted_jwt=$(gpg --decrypt --quiet --batch --passphrase '${{ env.PASSPHRASE }}' --output - <(echo '${{ env.JWT }}' | base64 --decode))
+          decrypted_jwt=$(gpg --decrypt --quiet --batch --passphrase "${{ env.PASSPHRASE }}" --output - <(echo "${{ env.ENCRYPTED_JWT }}" | base64 --decode))
           echo "::add-mask::$decrypted_jwt"
           echo "decrypted-jwt=$decrypted_jwt" >> $GITHUB_OUTPUT
-          echo "Descrypted"
 
       - name: 🧪 Website Tests - Chrome
         uses: cypress-io/github-action@v5
@@ -251,7 +250,7 @@ jobs:
     timeout-minutes: 15
     runs-on: ubuntu-latest
     container:
-      image: cypress/browsers:node16.14.2-slim-chrome103-ff102
+      image: cypress/browsers:node16.18.0-chrome107-ff106-edge
       options: --user 1001
     strategy:
       # when one test fails, DO NOT cancel the other
@@ -294,12 +293,11 @@ jobs:
         id: decrypt-vercel-jwt
         env:
           PASSPHRASE: ${{ secrets.PGP_SECRET_SIGNING_PASSPHRASE }}
-          JWT: ${{ needs.wait-for-preview.outputs.encrypted-vercel-jwt }}
+          ENCRYPTED_JWT: ${{ needs.wait-for-preview.outputs.encrypted-vercel-jwt }}
         run: |
-          decrypted_jwt=$(gpg --decrypt --quiet --batch --passphrase '${{ env.PASSPHRASE }}' --output - <(echo '${{ env.JWT }}' | base64 --decode))
+          decrypted_jwt=$(gpg --decrypt --quiet --batch --passphrase "${{ env.PASSPHRASE }}" --output - <(echo "${{ env.ENCRYPTED_JWT }}" | base64 --decode))
           echo "::add-mask::$decrypted_jwt"
           echo "decrypted-jwt=$decrypted_jwt" >> $GITHUB_OUTPUT
-          echo "Descrypted"
 
       - name: 🧪 Website Tests - Chrome
         uses: cypress-io/github-action@v5
