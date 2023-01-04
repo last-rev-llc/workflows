@@ -137,7 +137,8 @@ jobs:
         env:
           NETLIFY_TOKEN: ${{ secrets.NETLIFY_TOKEN }}
 
-      - if: ${{ inputs.provider != 'vercel' && inputs.provider != 'netlify' }}
+      - name: 🔍 Check if provider is valid
+        if: ${{ inputs.provider != 'vercel' && inputs.provider != 'netlify' }}
         run: |
           echo "::error title=Invalid provider::Invalid provider, please make sure you enter a valid option."
           exit 1
@@ -276,7 +277,7 @@ jobs:
           VERCEL_JWT: _vercel_jwt=${{ steps.wait-for-preview.outputs.vercel-jwt }}
           PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
           PERCY_PARALLEL_NONCE: ${{ needs.nonce.outputs.result }}
-          PERCY_PARALLEL_TOTAL: 5
+          PERCY_PARALLEL_TOTAL: ${{ inputs.parallel-jobs }}
           COMMIT_INFO_BRANCH: ${{ github.head_ref }}
           COMMIT_INFO_MESSAGE: ${{ github.event.pull_request.title }}
           COMMIT_INFO_AUTHOR: ${{ github.triggering_actor }}
