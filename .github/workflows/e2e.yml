@@ -29,6 +29,8 @@ on:
         required: false
       PERCY_TOKEN:
         required: false
+      PGP_SECRET_SIGNING_PASSPHRASE:
+        required: false
 
 jobs:
   generate-matrix:
