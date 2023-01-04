@@ -142,10 +142,10 @@ jobs:
         if: ${{ inputs.provider == 'vercel' }}
         id: encrypt-vercel-jwt
         env:
-          SECRET: ${{ secrets.PGP_SECRET_SIGNING_PASSPHRASE }}
+          PASSPHRASE: ${{ secrets.PGP_SECRET_SIGNING_PASSPHRASE }}
           JWT: ${{ steps.wait-for-vercel-preview.outputs.vercel_jwt }}
         run: |
-          encrypted_jwt=$(gpg --symmetric --batch --passphrase "${{ env.SECRET }}" --output - <(echo "${{ env.JWT }}") | base64 -w0)
+          encrypted_jwt=$(gpg --symmetric --batch --passphrase "$PASSPHRASE" --output - <(echo "$JWT") | base64 -w0)
           echo "encrypted-jwt=$encrypted_jwt" >> $GITHUB_OUTPUT
 
       - name: ⏳ Wait for Netlify Preview
@@ -208,10 +208,10 @@ jobs:
         if: ${{ inputs.provider == 'vercel' }}
         id: decrypt-vercel-jwt
         env:
-          SECRET: ${{ secrets.PGP_SECRET_SIGNING_PASSPHRASE }}
+          PASSPHRASE: ${{ secrets.PGP_SECRET_SIGNING_PASSPHRASE }}
           JWT: ${{ needs.wait-for-preview.outputs.encrypted-vercel-jwt }}
         run: |
-          decrypted_jwt=$(gpg --decrypt --quiet --batch --passphrase "${{ env.SECRET }}" --output - <(echo "${{ env.JWT }}" | base64 --decode))
+          decrypted_jwt=$(gpg --decrypt --quiet --batch --passphrase "$PASSPHRASE" --output - <(echo "$JWT" | base64 --decode))
           echo "decrypted-jwt=$decrypted_jwt" >> $GITHUB_OUTPUT
 
       - name: 🧪 Website Tests - Chrome
@@ -289,10 +289,10 @@ jobs:
         if: ${{ inputs.provider == 'vercel' }}
         id: decrypt-vercel-jwt
         env:
-          SECRET: ${{ secrets.PGP_SECRET_SIGNING_PASSPHRASE }}
+          PASSPHRASE: ${{ secrets.PGP_SECRET_SIGNING_PASSPHRASE }}
           JWT: ${{ needs.wait-for-preview.outputs.encrypted-vercel-jwt }}
         run: |
-          decrypted_jwt=$(gpg --decrypt --quiet --batch --passphrase "${{ env.SECRET }}" --output - <(echo "${{ env.JWT }}" | base64 --decode))
+          decrypted_jwt=$(gpg --decrypt --quiet --batch --passphrase "$PASSPHRASE" --output - <(echo "$JWT" | base64 --decode))
           echo "decrypted-jwt=$decrypted_jwt" >> $GITHUB_OUTPUT
 
       - name: 🧪 Website Tests - Chrome
