@@ -195,7 +195,9 @@ jobs:
           # determine the unique run id necessary to re-run the checks
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  cypress-ui-chrome-tests-with-snapshots:
+  # Separate job for running Percy so we can have this set as a required check
+  # for merging to main branch
+  percy-cypress-ui-chrome-tests:
     if: ${{ contains(github.event.pull_request.labels.*.name, 'qa-ready') }}
     needs:
       - generate-matrix
