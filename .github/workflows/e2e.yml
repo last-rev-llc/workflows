@@ -58,7 +58,7 @@ jobs:
       - name: 🔍 Check if Percy token exists
         if: ${{ env.percy-token == '' }}
         run: |
-          echo "Percy token not available as secret, please make sure the right one is set on the project."
+          echo "::error title=Percy token not set::Percy token not available as secret, please make sure the right one is set on the project."
           exit 1
       - id: nonce
         # Don't use deprecated set-output as per https://github.blog/changelog/2022-10-11-github-actions-deprecating-save-state-and-set-output-commands/
@@ -131,7 +131,7 @@ jobs:
 
       - if: ${{ inputs.provider != 'vercel' && inputs.provider != 'netlify' }}
         run: |
-          echo "Invalid provider, please make sure you enter a valid option."
+          echo "::error title=Invalid provider::Invalid provider, please make sure you enter a valid option."
           exit 1
 
   cypress-ui-chrome-tests:
