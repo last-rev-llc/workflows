@@ -124,7 +124,7 @@ jobs:
       encrypted-vercel-jwt: ${{ steps.encrypt-vercel-jwt.outputs.encrypted-jwt }}
     steps:
       - name: 🔍 Check if provider is valid
-        if: ${{ contains(fromJSON('["netlify","vercel"]'), inputs.provider) }}
+        if: ${{ !contains(fromJSON('["netlify","vercel"]'), inputs.provider) }}
         run: |
           echo "::error title=Invalid provider::Invalid provider, please make sure you enter a valid option."
           exit 1
