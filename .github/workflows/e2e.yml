@@ -96,7 +96,7 @@ jobs:
         with:
           node-version: 16
 
-      - name: '🚀 Dependencies cache'
+      - name: 🚀 Dependencies cache
         uses: actions/cache@v3
         id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
         with:
@@ -107,11 +107,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
 
-      - name: '📦 Install project dependencies'
+      - name: 📦 Install project dependencies
         if: ${{ steps.yarn-cache.outputs.cache-hit != 'true' }}
         run: yarn --prefer-offline
 
-      - name: '🔍 Print Cypress info'
+      - name: 🔍 Print Cypress info
         working-directory: './packages/web/'
         run: yarn cypress info
 
@@ -121,15 +121,15 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       preview-url: ${{ steps.wait-for-netflify-preview.outputs.url || steps.wait-for-vercel-preview.outputs.url }}
-      vercel-jwt: ${{ steps.wait-for-vercel-preview.outputs.vercel_jwt }}
+      encrypted-vercel-jwt: ${{ steps.encrypt-vercel-jwt.outputs.encrypted-jwt }}
     steps:
       - name: 🔍 Check if provider is valid
-        if: ${{ inputs.provider != 'vercel' && inputs.provider != 'netlify' }}
+        if: ${{ contains(fromJSON('["netlify","vercel"]'), inputs.provider) }}
         run: |
           echo "::error title=Invalid provider::Invalid provider, please make sure you enter a valid option."
           exit 1
 
-      - name: '⏳ Wait for Vercel Preview'
+      - name: ⏳ Wait for Vercel Preview
         if: ${{ inputs.provider == 'vercel' }}
         uses: patrickedqvist/wait-for-vercel-preview@1d4a973cb668249d5fb0e34d04be05634e396a8b
         id: wait-for-vercel-preview
@@ -138,7 +138,16 @@ jobs:
           max_timeout: ${{ inputs.preview-max-timeout }}
           vercel_password: ${{ secrets.VERCEL_PREVIEW_DEPLOYMENT_PASSWORD }}
 
-      - name: '⏳ Wait for Netlify Preview'
+      - name: 🔒 Encrypt Vercel JWT
+        if: ${{ inputs.provider == 'vercel' }}
+        id: encrypt-vercel-jwt
+        env:
+          SECRET: ${{ secrets.PGP_SECRET_SIGNING_PASSPHRASE }}
+        run: |
+          encrypted_jwt=$(gpg --symmetric --batch --passphrase "$SECRET" --output - <(echo "${{ steps.wait-for-vercel-preview.outputs.vercel_jwt }}") | base64 -w0)
+          echo "encrypted-jwt=$encrypted_jwt" >> $GITHUB_OUTPUT
+
+      - name: ⏳ Wait for Netlify Preview
         if: ${{ inputs.provider == 'netlify' }}
         uses: jlevy-io/wait-for-netlify-deploy-with-headers@3.0.3
         id: wait-for-netflify-preview
@@ -179,7 +188,7 @@ jobs:
         with:
           node-version: 16
 
-      - name: '🚀 Dependencies cache'
+      - name: 🚀 Dependencies cache
         uses: actions/cache@v3
         id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
         with:
@@ -190,11 +199,20 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
 
-      - name: '📦 Install project dependencies'
+      - name: 📦 Install project dependencies
         if: ${{ steps.yarn-cache.outputs.cache-hit != 'true' }}
         run: yarn --prefer-offline
 
-      - name: '🧪 Website Tests - Chrome'
+      - name: 🔓 Decrypt Vercel JWT
+        if: ${{ inputs.provider == 'vercel' }}
+        id: decrypt-vercel-jwt
+        env:
+          SECRET: ${{ secrets.PGP_SECRET_SIGNING_PASSPHRASE }}
+        run: |
+          decrypted_jwt=$(gpg --decrypt --quiet --batch --passphrase "$SECRET" --output - <(echo "${{ needs.wait-for-preview.outputs.encrypted-vercel-jwt }}" | base64 --decode))
+          echo "decrypted-jwt=$decrypted_jwt" >> $GITHUB_OUTPUT
+
+      - name: 🧪 Website Tests - Chrome
         uses: cypress-io/github-action@v5
         with:
           install: false
@@ -208,7 +226,7 @@ jobs:
           CYPRESS_BASE_URL: ${{ needs.wait-for-preview.outputs.preview-url }}
           CYPRESS_PROJECT_ID: ${{ secrets.CYPRESS_PROJECT_ID }}
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-          VERCEL_JWT: _vercel_jwt=${{ steps.wait-for-preview.outputs.vercel-jwt }}
+          VERCEL_JWT: _vercel_jwt=${{ steps.decrypt-vercel-jwt.outputs.decrypted-jwt }}
           COMMIT_INFO_BRANCH: ${{ github.head_ref }}
           COMMIT_INFO_MESSAGE: ${{ github.event.pull_request.title }}
           COMMIT_INFO_AUTHOR: ${{ github.triggering_actor }}
@@ -250,7 +268,7 @@ jobs:
         with:
           node-version: 16
 
-      - name: '🚀 Dependencies cache'
+      - name: 🚀 Dependencies cache
         uses: actions/cache@v3
         id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
         with:
@@ -261,11 +279,20 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
 
-      - name: '📦 Install project dependencies'
+      - name: 📦 Install project dependencies
         if: ${{ steps.yarn-cache.outputs.cache-hit != 'true' }}
         run: yarn --prefer-offline
 
-      - name: '🧪 Website Tests - Chrome'
+      - name: 🔓 Decrypt Vercel JWT
+        if: ${{ inputs.provider == 'vercel' }}
+        id: decrypt-vercel-jwt
+        env:
+          SECRET: ${{ secrets.PGP_SECRET_SIGNING_PASSPHRASE }}
+        run: |
+          decrypted_jwt=$(gpg --decrypt --quiet --batch --passphrase "$SECRET" --output - <(echo "${{ needs.wait-for-preview.outputs.encrypted-vercel-jwt }}" | base64 --decode))
+          echo "decrypted-jwt=$decrypted_jwt" >> $GITHUB_OUTPUT
+
+      - name: 🧪 Website Tests - Chrome
         uses: cypress-io/github-action@v5
         with:
           install: false
@@ -279,7 +306,7 @@ jobs:
           CYPRESS_BASE_URL: ${{ needs.wait-for-preview.outputs.preview-url }}
           CYPRESS_PROJECT_ID: ${{ secrets.CYPRESS_PROJECT_ID }}
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-          VERCEL_JWT: _vercel_jwt=${{ needs.wait-for-preview.outputs.vercel-jwt }}
+          VERCEL_JWT: _vercel_jwt=${{ steps.decrypt-vercel-jwt.outputs.decrypted-jwt }}
           PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
           PERCY_PARALLEL_NONCE: ${{ needs.nonce.outputs.result }}
           PERCY_PARALLEL_TOTAL: ${{ inputs.parallel-jobs }}
