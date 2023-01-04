@@ -14,6 +14,10 @@ on:
         required: false
         type: number
         default: 5
+      preview-max-timeout:
+        required: false
+        type: number
+        default: 600
     secrets:
       CYPRESS_PROJECT_ID:
         required: true
@@ -125,7 +129,7 @@ jobs:
         id: wait-for-vercel-preview
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          max_timeout: 600
+          max_timeout: ${{ inputs.preview-max-timeout }}
           vercel_password: ${{ secrets.VERCEL_PREVIEW_DEPLOYMENT_PASSWORD }}
 
       - name: '⏳ Wait for Netlify Preview'
@@ -134,6 +138,7 @@ jobs:
         id: wait-for-netflify-preview
         with:
           site_id: ${{ secrets.NETLIFY_SITE_ID }}
+          max_timeout: ${{ inputs.preview-max-timeout }}
         env:
           NETLIFY_TOKEN: ${{ secrets.NETLIFY_TOKEN }}
 
