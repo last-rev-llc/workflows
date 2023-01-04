@@ -32,7 +32,7 @@ jobs:
     outputs:
       matrix: ${{ steps.save-matrix-value.outputs.result }}
     steps:
-      - name: Generate matrix values
+      - name: 🔢 Generate matrix values
         run: |
           output="["
           for i in $(seq 1 "${{ inputs.parallel-jobs }}"); do
@@ -52,10 +52,18 @@ jobs:
     if: ${{ contains(github.event.pull_request.labels.*.name, 'qa-ready') }}
     outputs:
       result: ${{ steps.nonce.outputs.result }}
+    env:
+      percy-token: ${{ secrets.PERCY_TOKEN }}
     steps:
+      - name: 🔍 Check if Percy token exists
+        if: ${{ env.percy-token == '' }}
+        run: |
+          echo "Percy token not available as secret, please make sure the right one is set on the project."
+          exit 1
       - id: nonce
         # Don't use deprecated set-output as per https://github.blog/changelog/2022-10-11-github-actions-deprecating-save-state-and-set-output-commands/
         run: echo "result=${{ github.run_id }}-$(date +%s)" >> $GITHUB_OUTPUT
+
 
   install-and-cache-dependencies:
     needs:
@@ -66,13 +74,12 @@ jobs:
       options: --user 1001
     steps:
       ## SETUP
-      - name: Checkout code
+      - name: 🛎 Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 2
 
-      - name: Setup Node.js environment
-        id: setup-node-16
+      - name: 🚧 Setup Node.js environment
         uses: actions/setup-node@v3
         with:
           node-version: 16
@@ -124,7 +131,7 @@ jobs:
 
       - if: ${{ inputs.provider != 'vercel' && inputs.provider != 'netlify' }}
         run: |
-          echo "Invalid provider"
+          echo "Invalid provider, please make sure you enter a valid option."
           exit 1
 
   cypress-ui-chrome-tests:
@@ -148,12 +155,12 @@ jobs:
         containers: ${{ fromJSON(needs.generate-matrix.outputs.matrix) }}
 
     steps:
-      - name: Checkout code
+      - name: 🛎 Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 2
 
-      - name: Setup Node.js environment
+      - name: 🚧 Setup Node.js environment
         uses: actions/setup-node@v3
         with:
           node-version: 16
@@ -219,12 +226,12 @@ jobs:
         containers: ${{ fromJSON(needs.generate-matrix.outputs.matrix) }}
 
     steps:
-      - name: Checkout code
+      - name: 🛎 Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 2
 
-      - name: Setup Node.js environment
+      - name: 🚧 Setup Node.js environment
         uses: actions/setup-node@v3
         with:
           node-version: 16
