@@ -211,9 +211,8 @@ jobs:
         id: decrypt-vercel-jwt
         env:
           PASSPHRASE: ${{ secrets.PGP_SECRET_SIGNING_PASSPHRASE }}
-          JWT: ${{ needs.wait-for-preview.outputs.encrypted-vercel-jwt }}
         run: |
-          decrypted_jwt=$(gpg --decrypt --quiet --batch --passphrase "$PASSPHRASE" --output - <(echo "$JWT" | base64 --decode))
+          decrypted_jwt=$(gpg --decrypt --quiet --batch --passphrase "$PASSPHRASE" --output - <(echo "${{ needs.wait-for-preview.outputs.encrypted-vercel-jwt }}" | base64 --decode))
           echo "decrypted-jwt=$decrypted_jwt" >> $GITHUB_OUTPUT
 
       - name: 🧪 Website Tests - Chrome
@@ -292,9 +291,8 @@ jobs:
         id: decrypt-vercel-jwt
         env:
           PASSPHRASE: ${{ secrets.PGP_SECRET_SIGNING_PASSPHRASE }}
-          JWT: ${{ needs.wait-for-preview.outputs.encrypted-vercel-jwt }}
         run: |
-          decrypted_jwt=$(gpg --decrypt --quiet --batch --passphrase "$PASSPHRASE" --output - <(echo "$JWT" | base64 --decode))
+          decrypted_jwt=$(gpg --decrypt --quiet --batch --passphrase "$PASSPHRASE" --output - <(echo "${{ needs.wait-for-preview.outputs.encrypted-vercel-jwt }}" | base64 --decode))
           echo "decrypted-jwt=$decrypted_jwt" >> $GITHUB_OUTPUT
 
       - name: 🧪 Website Tests - Chrome
