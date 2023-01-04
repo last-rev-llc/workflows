@@ -123,6 +123,12 @@ jobs:
       preview-url: ${{ steps.wait-for-netflify-preview.outputs.url || steps.wait-for-vercel-preview.outputs.url }}
       vercel-jwt: ${{ steps.wait-for-vercel-preview.outputs.vercel_jwt }}
     steps:
+      - name: 🔍 Check if provider is valid
+        if: ${{ inputs.provider != 'vercel' && inputs.provider != 'netlify' }}
+        run: |
+          echo "::error title=Invalid provider::Invalid provider, please make sure you enter a valid option."
+          exit 1
+
       - name: '⏳ Wait for Vercel Preview'
         if: ${{ inputs.provider == 'vercel' }}
         uses: patrickedqvist/wait-for-vercel-preview@1d4a973cb668249d5fb0e34d04be05634e396a8b
@@ -141,12 +147,6 @@ jobs:
           max_timeout: ${{ inputs.preview-max-timeout }}
         env:
           NETLIFY_TOKEN: ${{ secrets.NETLIFY_TOKEN }}
-
-      - name: 🔍 Check if provider is valid
-        if: ${{ inputs.provider != 'vercel' && inputs.provider != 'netlify' }}
-        run: |
-          echo "::error title=Invalid provider::Invalid provider, please make sure you enter a valid option."
-          exit 1
 
   cypress-ui-chrome-tests:
     if: ${{ !contains(github.event.pull_request.labels.*.name, 'qa-ready') }}
