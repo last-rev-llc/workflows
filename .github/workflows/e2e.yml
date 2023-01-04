@@ -141,7 +141,7 @@ jobs:
           vercel_password: ${{ secrets.VERCEL_PREVIEW_DEPLOYMENT_PASSWORD }}
 
       - name: 🔒 Encrypt Vercel JWT
-        if: ${{ inputs.provider == 'vercel' }}
+        if: ${{ inputs.provider == 'vercel' && secrets.PGP_SECRET_SIGNING_PASSPHRASE }}
         id: encrypt-vercel-jwt
         env:
           PASSPHRASE: ${{ secrets.PGP_SECRET_SIGNING_PASSPHRASE }}
@@ -207,7 +207,7 @@ jobs:
         run: yarn --prefer-offline
 
       - name: 🔓 Decrypt Vercel JWT
-        if: ${{ inputs.provider == 'vercel' }}
+        if: ${{ inputs.provider == 'vercel' && secrets.PGP_SECRET_SIGNING_PASSPHRASE }}
         id: decrypt-vercel-jwt
         env:
           PASSPHRASE: ${{ secrets.PGP_SECRET_SIGNING_PASSPHRASE }}
@@ -288,7 +288,7 @@ jobs:
         run: yarn --prefer-offline
 
       - name: 🔓 Decrypt Vercel JWT
-        if: ${{ inputs.provider == 'vercel' }}
+        if: ${{ inputs.provider == 'vercel' && secrets.PGP_SECRET_SIGNING_PASSPHRASE }}
         id: decrypt-vercel-jwt
         env:
           PASSPHRASE: ${{ secrets.PGP_SECRET_SIGNING_PASSPHRASE }}
