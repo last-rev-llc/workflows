@@ -213,7 +213,10 @@ jobs:
           PASSPHRASE: ${{ secrets.PGP_SECRET_SIGNING_PASSPHRASE }}
           JWT: ${{ needs.wait-for-preview.outputs.encrypted-vercel-jwt }}
         run: |
-          echo "decrypted-jwt=$(gpg --decrypt --quiet --batch --passphrase '${{ env.PASSPHRASE }}' --output - <(echo '${{ env.JWT }}' | base64 --decode))" >> $GITHUB_OUTPUT
+          decrypted_jwt=$(gpg --decrypt --quiet --batch --passphrase '${{ env.PASSPHRASE }}' --output - <(echo '${{ env.JWT }}' | base64 --decode))
+          echo "::add-mask::$decrypted_jwt"
+          echo "decrypted-jwt=$decrypted_jwt" >> $GITHUB_OUTPUT
+          echo "Descrypted"
 
       - name: 🧪 Website Tests - Chrome
         uses: cypress-io/github-action@v5
@@ -293,7 +296,10 @@ jobs:
           PASSPHRASE: ${{ secrets.PGP_SECRET_SIGNING_PASSPHRASE }}
           JWT: ${{ needs.wait-for-preview.outputs.encrypted-vercel-jwt }}
         run: |
-          echo "decrypted-jwt=$(gpg --decrypt --quiet --batch --passphrase '${{ env.PASSPHRASE }}' --output - <(echo '${{ env.JWT }}' | base64 --decode))" >> $GITHUB_OUTPUT
+          decrypted_jwt=$(gpg --decrypt --quiet --batch --passphrase '${{ env.PASSPHRASE }}' --output - <(echo '${{ env.JWT }}' | base64 --decode))
+          echo "::add-mask::$decrypted_jwt"
+          echo "decrypted-jwt=$decrypted_jwt" >> $GITHUB_OUTPUT
+          echo "Descrypted"
 
       - name: 🧪 Website Tests - Chrome
         uses: cypress-io/github-action@v5
