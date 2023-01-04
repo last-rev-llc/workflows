@@ -10,6 +10,10 @@ on:
         required: false
         type: boolean
         default: true
+      parallel-jobs:
+        required: false
+        type: number
+        default: 5
     secrets:
       CYPRESS_PROJECT_ID:
         required: true
@@ -23,7 +27,17 @@ on:
         required: false
 
 jobs:
-  # Nonce for re-runs: https://docs.percy.io/docs/parallel-test-suites#github-actions
+  generate-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.save-matrix-value.outputs.result }}
+    steps:
+      - name: Generate matrix values
+        run: ./generate_matrix.sh ${{ inputs.parallel-jobs }} > matrix.txt
+      - name: Save matrix value
+        id: save-matrix-value
+        run: echo "result=$(cat matrix.txt)" >> $GITHUB_OUTPUT
+
   check-percy-token:
     env:
       percy-token: ${{ secrets.PERCY_TOKEN }}
@@ -35,11 +49,12 @@ jobs:
         name: Check if Percy token exists
         run: echo "result=${{ secrets.PERCY_TOKEN != '' }}" >> $GITHUB_OUTPUT
 
+  # Nonce for re-runs: https://docs.percy.io/docs/parallel-test-suites#github-actions
   nonce:
     runs-on: ubuntu-latest
     needs:
       - check-percy-token
-    if: ${{ needs.check-percy-token.outputs.token-exists == true }}
+    if: ${{ needs.check-percy-token.outputs.token-exists == 'true' }}
     outputs:
       result: ${{ steps.nonce.outputs.result }}
     steps:
@@ -77,6 +92,7 @@ jobs:
             ${{ runner.os }}-yarn-
 
       - name: '📦 Install project dependencies'
+        if: ${{ steps.yarn-cache.outputs.cache-hit != 'true' }}
         run: yarn --prefer-offline
 
       - name: '🔍 Print Cypress info'
@@ -108,6 +124,7 @@ jobs:
         env:
           NETLIFY_TOKEN: ${{ secrets.NETLIFY_TOKEN }}
 
+
   cypress-ui-chrome-tests:
     if: ${{ needs.check-percy-token.outputs.token-exists == 'false' }}
     timeout-minutes: 15
@@ -116,6 +133,7 @@ jobs:
       image: cypress/browsers:node16.14.2-slim-chrome103-ff102
       options: --user 1001
     needs:
+      - generate-matrix
       - check-percy-token
       - wait-for-preview
     strategy:
@@ -126,14 +144,18 @@ jobs:
       fail-fast: false
       matrix:
         # run copies of the current job in parallel
-        containers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        containers: ${{ needs.generate-matrix.outputs.matrix }}
 
     steps:
-      ## SETUP
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 2
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
 
       - name: '🚀 Dependencies cache'
         uses: actions/cache@v3
@@ -146,12 +168,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
 
-      - name: Setup Node.js environment
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16
-
       - name: '📦 Install project dependencies'
+        if: ${{ steps.yarn-cache.outputs.cache-hit != 'true' }}
         run: yarn --prefer-offline
 
       - name: '🧪 Website Tests - Chrome'
@@ -210,11 +228,15 @@ jobs:
       #     labels: 'qa-ready'
       #     add_comment: true
 
-      ## SETUP
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 2
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
 
       - name: '🚀 Dependencies cache'
         uses: actions/cache@v3
@@ -227,12 +249,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
 
-      - name: Setup Node.js environment
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16
-
       - name: '📦 Install project dependencies'
+        if: ${{ steps.yarn-cache.outputs.cache-hit != 'true' }}
         run: yarn --prefer-offline
 
       - name: '🧪 Website Tests - Chrome'
