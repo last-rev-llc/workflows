@@ -174,7 +174,7 @@ jobs:
         run: yarn --prefer-offline
 
       - name: '🧪 Website Tests - Chrome'
-        uses: cypress-io/github-action@v4
+        uses: cypress-io/github-action@v5
         with:
           install: false
           project: ./packages/web
@@ -245,7 +245,7 @@ jobs:
         run: yarn --prefer-offline
 
       - name: '🧪 Website Tests - Chrome'
-        uses: cypress-io/github-action@v4
+        uses: cypress-io/github-action@v5
         with:
           install: false
           project: ./packages/web
