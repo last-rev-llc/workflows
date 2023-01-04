@@ -51,9 +51,9 @@ jobs:
 
   # Nonce for re-runs: https://docs.percy.io/docs/parallel-test-suites#github-actions
   nonce:
-    runs-on: ubuntu-latest
     needs:
       - check-percy-token
+    runs-on: ubuntu-latest
     if: ${{ needs.check-percy-token.outputs.token-exists == 'true' }}
     outputs:
       result: ${{ steps.nonce.outputs.result }}
@@ -63,6 +63,8 @@ jobs:
         run: echo "result=${{ github.run_id }}-$(date +%s)" >> $GITHUB_OUTPUT
 
   install-and-cache-dependencies:
+    needs:
+      - generate-matrix
     runs-on: ubuntu-latest
     container:
       image: cypress/browsers:node16.14.2-slim-chrome103-ff102
@@ -100,8 +102,9 @@ jobs:
         run: yarn cypress info
 
   wait-for-preview:
+    needs:
+      - install-and-cache-dependencies
     runs-on: ubuntu-latest
-    needs: install-and-cache-dependencies
     outputs:
       preview-url: ${{ steps.wait-for-netflify-preview.outputs.url || steps.wait-for-vercel-preview.outputs.url }}
       vercel-jwt: ${{ steps.wait-for-vercel-preview.outputs.vercel_jwt }}
@@ -127,15 +130,15 @@ jobs:
 
   cypress-ui-chrome-tests:
     if: ${{ needs.check-percy-token.outputs.token-exists == 'false' }}
+    needs:
+      - generate-matrix
+      - check-percy-token
+      - wait-for-preview
     timeout-minutes: 15
     runs-on: ubuntu-latest
     container:
       image: cypress/browsers:node16.14.2-slim-chrome103-ff102
       options: --user 1001
-    needs:
-      - generate-matrix
-      - check-percy-token
-      - wait-for-preview
     strategy:
       # when one test fails, DO NOT cancel the other
       # containers, because this will kill Cypress processes
@@ -196,15 +199,16 @@ jobs:
 
   cypress-ui-chrome-tests-with-snapshots:
     if: ${{ needs.check-percy-token.outputs.token-exists == 'true' }}
+    needs:
+      - generate-matrix
+      - check-percy-token
+      - nonce
+      - wait-for-preview
     timeout-minutes: 15
     runs-on: ubuntu-latest
     container:
       image: cypress/browsers:node16.14.2-slim-chrome103-ff102
       options: --user 1001
-    needs:
-      - check-percy-token
-      - nonce
-      - wait-for-preview
     strategy:
       # when one test fails, DO NOT cancel the other
       # containers, because this will kill Cypress processes
