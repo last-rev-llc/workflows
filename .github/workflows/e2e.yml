@@ -279,7 +279,7 @@ jobs:
           CYPRESS_BASE_URL: ${{ needs.wait-for-preview.outputs.preview-url }}
           CYPRESS_PROJECT_ID: ${{ secrets.CYPRESS_PROJECT_ID }}
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-          VERCEL_JWT: _vercel_jwt=${{ steps.wait-for-preview.outputs.vercel-jwt }}
+          VERCEL_JWT: _vercel_jwt=${{ needs.wait-for-preview.outputs.vercel-jwt }}
           PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
           PERCY_PARALLEL_NONCE: ${{ needs.nonce.outputs.result }}
           PERCY_PARALLEL_TOTAL: ${{ inputs.parallel-jobs }}
