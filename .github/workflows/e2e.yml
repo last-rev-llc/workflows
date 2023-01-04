@@ -46,23 +46,10 @@ jobs:
         id: save-matrix-value
         run: echo "result=$(cat matrix.txt)" >> $GITHUB_OUTPUT
 
-  check-percy-token:
-    env:
-      percy-token: ${{ secrets.PERCY_TOKEN }}
-    outputs:
-      token-exists: ${{ steps.check-percy-token.outputs.result }}
-    runs-on: ubuntu-latest
-    steps:
-      - id: check-percy-token
-        name: Check if Percy token exists
-        run: echo "result=${{ secrets.PERCY_TOKEN != '' }}" >> $GITHUB_OUTPUT
-
   # Nonce for re-runs: https://docs.percy.io/docs/parallel-test-suites#github-actions
   nonce:
-    needs:
-      - check-percy-token
     runs-on: ubuntu-latest
-    if: ${{ needs.check-percy-token.outputs.token-exists == 'true' }}
+    if: ${{ contains(github.event.pull_request.labels.*.name, 'qa-ready') }}
     outputs:
       result: ${{ steps.nonce.outputs.result }}
     steps:
@@ -141,10 +128,9 @@ jobs:
           exit 1
 
   cypress-ui-chrome-tests:
-    if: ${{ needs.check-percy-token.outputs.token-exists == 'false' }}
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'qa-ready') }}
     needs:
       - generate-matrix
-      - check-percy-token
       - wait-for-preview
     timeout-minutes: 15
     runs-on: ubuntu-latest
@@ -210,10 +196,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   cypress-ui-chrome-tests-with-snapshots:
-    if: ${{ needs.check-percy-token.outputs.token-exists == 'true' }}
+    if: ${{ contains(github.event.pull_request.labels.*.name, 'qa-ready') }}
     needs:
       - generate-matrix
-      - check-percy-token
       - nonce
       - wait-for-preview
     timeout-minutes: 15
@@ -232,18 +217,6 @@ jobs:
         containers: ${{ fromJSON(needs.generate-matrix.outputs.matrix) }}
 
     steps:
-      # Enforce label on PR to prevent unnecessary testing
-      # - name: Enforce QA label on PR
-      #   uses: mheap/github-action-required-labels@v2
-      #   if: ${{ github.event_name == 'pull_request' }}
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   with:
-      #     mode: exactly
-      #     count: 1
-      #     labels: 'qa-ready'
-      #     add_comment: true
-
       - name: Checkout code
         uses: actions/checkout@v3
         with:
