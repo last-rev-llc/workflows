@@ -213,6 +213,7 @@ jobs:
           PASSPHRASE: ${{ secrets.PGP_SECRET_SIGNING_PASSPHRASE }}
         run: |
           decrypted_jwt=$(gpg --decrypt --quiet --batch --passphrase "$PASSPHRASE" --output - <(echo "${{ needs.wait-for-preview.outputs.encrypted-vercel-jwt }}" | base64 --decode))
+          echo "::add-mask::$decrypted_jwt"
           echo "decrypted-jwt=$decrypted_jwt" >> $GITHUB_OUTPUT
 
       - name: 🧪 Website Tests - Chrome
@@ -293,6 +294,7 @@ jobs:
           PASSPHRASE: ${{ secrets.PGP_SECRET_SIGNING_PASSPHRASE }}
         run: |
           decrypted_jwt=$(gpg --decrypt --quiet --batch --passphrase "$PASSPHRASE" --output - <(echo "${{ needs.wait-for-preview.outputs.encrypted-vercel-jwt }}" | base64 --decode))
+          echo "::add-mask::$decrypted_jwt"
           echo "decrypted-jwt=$decrypted_jwt" >> $GITHUB_OUTPUT
 
       - name: 🧪 Website Tests - Chrome
