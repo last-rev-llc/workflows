@@ -213,7 +213,8 @@ jobs:
           PASSPHRASE: ${{ secrets.PGP_SECRET_SIGNING_PASSPHRASE }}
           ENCRYPTED_JWT: ${{ needs.wait-for-preview.outputs.encrypted-vercel-jwt }}
         run: |
-          decrypted_jwt=$(gpg --decrypt --quiet --batch --passphrase "${{ env.PASSPHRASE }}" --output - <(echo "${{ env.ENCRYPTED_JWT }}" | base64 --decode))
+          echo $ENCRYPTED_JWT | base64 --decode > encrypted_jwt
+          decrypted_jwt=$(gpg --decrypt --quiet --batch --passphrase "${{ env.PASSPHRASE }}" --output - encrypted_jwt)
           echo "::add-mask::$decrypted_jwt"
           echo "decrypted-jwt=$decrypted_jwt" >> $GITHUB_OUTPUT
 
@@ -295,7 +296,8 @@ jobs:
           PASSPHRASE: ${{ secrets.PGP_SECRET_SIGNING_PASSPHRASE }}
           ENCRYPTED_JWT: ${{ needs.wait-for-preview.outputs.encrypted-vercel-jwt }}
         run: |
-          decrypted_jwt=$(gpg --decrypt --quiet --batch --passphrase "${{ env.PASSPHRASE }}" --output - <(echo "${{ env.ENCRYPTED_JWT }}" | base64 --decode))
+          echo $ENCRYPTED_JWT | base64 --decode > encrypted_jwt
+          decrypted_jwt=$(gpg --decrypt --quiet --batch --passphrase "${{ env.PASSPHRASE }}" --output - encrypted_jwt)
           echo "::add-mask::$decrypted_jwt"
           echo "decrypted-jwt=$decrypted_jwt" >> $GITHUB_OUTPUT
 
