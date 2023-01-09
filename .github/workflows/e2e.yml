@@ -70,7 +70,6 @@ jobs:
         # Don't use deprecated set-output as per https://github.blog/changelog/2022-10-11-github-actions-deprecating-save-state-and-set-output-commands/
         run: echo "result=${{ github.run_id }}-$(date +%s)" >> $GITHUB_OUTPUT
 
-
   install-and-cache-dependencies:
     needs:
       - generate-matrix
@@ -82,7 +81,9 @@ jobs:
       percy-token: ${{ secrets.PERCY_TOKEN }}
     steps:
       - name: 🕸 Fail if qa-ready without Percy token
-        if: ${{ contains(github.event.pull_request.labels.*.name, 'qa-ready') && env.percy-token == '' }}
+        if:
+          ${{ contains(github.event.pull_request.labels.*.name, 'qa-ready') &&
+          env.percy-token == '' }}
         run: |
           echo "::error title=Percy token not set::Percy token not available as secret, please make sure the right one is set on the project and passed as secret."
           exit 1
@@ -122,8 +123,11 @@ jobs:
       - install-and-cache-dependencies
     runs-on: ubuntu-latest
     outputs:
-      preview-url: ${{ steps.wait-for-netflify-preview.outputs.url || steps.wait-for-vercel-preview.outputs.url }}
-      encrypted-vercel-jwt: ${{ steps.encrypt-vercel-jwt.outputs.encrypted-jwt }}
+      preview-url:
+        ${{ steps.wait-for-netflify-preview.outputs.url ||
+        steps.wait-for-vercel-preview.outputs.url }}
+      encrypted-vercel-jwt:
+        ${{ steps.encrypt-vercel-jwt.outputs.encrypted-jwt }}
     steps:
       - name: 🔍 Check if provider is valid
         if: ${{ !contains(fromJSON('["netlify","vercel"]'), inputs.provider) }}
@@ -133,7 +137,7 @@ jobs:
 
       - name: ⏳ Wait for Vercel Preview
         if: ${{ inputs.provider == 'vercel' }}
-        uses: patrickedqvist/wait-for-vercel-preview@1d4a973cb668249d5fb0e34d04be05634e396a8b
+        uses: patrickedqvist/wait-for-vercel-preview@c934e81c4b18ad59acbb866fb817ed586b17ecba
         id: wait-for-vercel-preview
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -211,7 +215,8 @@ jobs:
         id: decrypt-vercel-jwt
         env:
           PASSPHRASE: ${{ secrets.PGP_SECRET_SIGNING_PASSPHRASE }}
-          ENCRYPTED_JWT: ${{ needs.wait-for-preview.outputs.encrypted-vercel-jwt }}
+          ENCRYPTED_JWT:
+            ${{ needs.wait-for-preview.outputs.encrypted-vercel-jwt }}
         run: |
           echo $ENCRYPTED_JWT | base64 --decode > encrypted_jwt
           decrypted_jwt=$(gpg --decrypt --quiet --batch --passphrase "${{ env.PASSPHRASE }}" --output - encrypted_jwt)
@@ -232,7 +237,8 @@ jobs:
           CYPRESS_BASE_URL: ${{ needs.wait-for-preview.outputs.preview-url }}
           CYPRESS_PROJECT_ID: ${{ secrets.CYPRESS_PROJECT_ID }}
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-          VERCEL_JWT: _vercel_jwt=${{ steps.decrypt-vercel-jwt.outputs.decrypted-jwt }}
+          VERCEL_JWT:
+            _vercel_jwt=${{ steps.decrypt-vercel-jwt.outputs.decrypted-jwt }}
           COMMIT_INFO_BRANCH: ${{ github.head_ref }}
           COMMIT_INFO_MESSAGE: ${{ github.event.pull_request.title }}
           COMMIT_INFO_AUTHOR: ${{ github.triggering_actor }}
@@ -294,7 +300,8 @@ jobs:
         id: decrypt-vercel-jwt
         env:
           PASSPHRASE: ${{ secrets.PGP_SECRET_SIGNING_PASSPHRASE }}
-          ENCRYPTED_JWT: ${{ needs.wait-for-preview.outputs.encrypted-vercel-jwt }}
+          ENCRYPTED_JWT:
+            ${{ needs.wait-for-preview.outputs.encrypted-vercel-jwt }}
         run: |
           echo $ENCRYPTED_JWT | base64 --decode > encrypted_jwt
           decrypted_jwt=$(gpg --decrypt --quiet --batch --passphrase "${{ env.PASSPHRASE }}" --output - encrypted_jwt)
@@ -315,7 +322,8 @@ jobs:
           CYPRESS_BASE_URL: ${{ needs.wait-for-preview.outputs.preview-url }}
           CYPRESS_PROJECT_ID: ${{ secrets.CYPRESS_PROJECT_ID }}
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-          VERCEL_JWT: _vercel_jwt=${{ steps.decrypt-vercel-jwt.outputs.decrypted-jwt }}
+          VERCEL_JWT:
+            _vercel_jwt=${{ steps.decrypt-vercel-jwt.outputs.decrypted-jwt }}
           PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
           PERCY_PARALLEL_NONCE: ${{ needs.nonce.outputs.result }}
           PERCY_PARALLEL_TOTAL: ${{ inputs.parallel-jobs }}
@@ -325,4 +333,3 @@ jobs:
           # Recommended: passing the GitHub token lets this action correctly
           # determine the unique run id necessary to re-run the checks
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
