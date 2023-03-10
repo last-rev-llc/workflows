@@ -35,6 +35,10 @@ on:
         required: false
       PGP_SECRET_SIGNING_PASSPHRASE:
         required: false
+      NETLIFY_SITE_ID:
+        required: false
+      NETLIFY_TOKEN:
+        required: false
 
 jobs:
   generate-matrix:
@@ -330,3 +334,5 @@ jobs:
           # Recommended: passing the GitHub token lets this action correctly
           # determine the unique run id necessary to re-run the checks
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          NETLIFY_TOKEN: ${{ secrets.NETLIFY_TOKEN }}
