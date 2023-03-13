@@ -231,7 +231,7 @@ jobs:
         uses: cypress-io/github-action@v5
         with:
           install: false
-          project: ${{ inputs.preview-max-timeout }}
+          project: ${{ inputs.working-directory }}
           browser: chrome
           record: ${{ inputs.record }}
           parallel: true
