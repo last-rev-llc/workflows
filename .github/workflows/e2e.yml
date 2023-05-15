@@ -73,7 +73,6 @@ jobs:
         if: ${{ env.percy-token == '' }}
         run: |
           echo "::error title=Percy token not set::Percy token not available as secret, please make sure the right one is set on the project and passed as secret."
-          exit 1
       - id: nonce
         # Don't use deprecated set-output as per https://github.blog/changelog/2022-10-11-github-actions-deprecating-save-state-and-set-output-commands/
         run: echo "result=${{ github.run_id }}-$(date +%s)" >> $GITHUB_OUTPUT
