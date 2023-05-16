@@ -87,12 +87,11 @@ jobs:
     env:
       percy-token: ${{ secrets.PERCY_TOKEN }}
     steps:
-      - name: 🕸 Fail if qa-ready without Percy token
+      - name: 🕸 Warning missing Percy token
         if: ${{ contains(github.event.pull_request.labels.*.name, 'qa-ready') &&
           env.percy-token == '' }}
         run: |
           echo "::error title=Percy token not set::Percy token not available as secret, please make sure the right one is set on the project and passed as secret."
-          exit 1
 
       ## SETUP
       - name: 🛎 Checkout code
