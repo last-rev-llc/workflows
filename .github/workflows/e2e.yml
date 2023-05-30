@@ -311,6 +311,7 @@ jobs:
       - name: 🧪 Website Tests - Chrome
         uses: cypress-io/github-action@v5
         with:
+          command-prefix: "percy exec -- npx"
           install: false
           project: ${{ inputs.working-directory }}
           browser: chrome
