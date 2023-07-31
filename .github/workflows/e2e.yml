@@ -140,7 +140,7 @@ jobs:
 
       - name: ⏳ Wait for Vercel Preview
         if: ${{ inputs.provider == 'vercel' }}
-        uses: patrickedqvist/wait-for-vercel-preview@c934e81c4b18ad59acbb866fb817ed586b17ecba
+        uses: patrickedqvist/wait-for-vercel-preview@v1.3.0
         id: wait-for-vercel-preview
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
