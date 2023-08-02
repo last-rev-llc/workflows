@@ -14,8 +14,12 @@ on:
         required: true
         type: string
         description:
-          'GitHub environment to be used as Vercel preview deployment to run
-          tests against'
+          'GitHub environment with the Vercel preview deployment to run tests against'
+      path:
+        required: false
+        type: string
+        default: '/'
+        description: 'Path to check in the preview deployment. Defaults to the root of the domain'
       parallel-jobs:
         required: false
         type: number
