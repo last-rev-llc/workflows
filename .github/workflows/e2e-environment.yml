@@ -14,8 +14,12 @@ on:
         required: true
         type: string
         description:
-          'GitHub environment to be used as Vercel preview deployment to run
-          tests against'
+          'GitHub environment with the Vercel preview deployment to run tests against'
+      path:
+        required: false
+        type: string
+        default: '/'
+        description: 'Path to check in the preview deployment. Defaults to the root of the domain'
       parallel-jobs:
         required: false
         type: number
@@ -156,6 +160,7 @@ jobs:
           max_timeout: ${{ inputs.preview-max-timeout }}
           vercel_password: ${{ secrets.VERCEL_PREVIEW_DEPLOYMENT_PASSWORD }}
           environment: ${{ inputs.environment }}
+          path: ${{ inputs.path }}
 
       - name: 🔒 Encrypt Vercel JWT
         if: ${{ inputs.provider == 'vercel' && env.PASSPHRASE }}
