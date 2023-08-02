@@ -160,6 +160,7 @@ jobs:
           max_timeout: ${{ inputs.preview-max-timeout }}
           vercel_password: ${{ secrets.VERCEL_PREVIEW_DEPLOYMENT_PASSWORD }}
           environment: ${{ inputs.environment }}
+          path: ${{ inputs.path }}
 
       - name: 🔒 Encrypt Vercel JWT
         if: ${{ inputs.provider == 'vercel' && env.PASSPHRASE }}
