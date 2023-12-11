@@ -22,6 +22,9 @@ on:
         required: false
         type: string
         default: "./packages/web/"
+      vercel-environment:
+        required: false
+        type: string
     secrets:
       CYPRESS_PROJECT_ID:
         required: true
@@ -145,6 +148,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           max_timeout: ${{ inputs.preview-max-timeout }}
+          environment: ${{ inputs.vercel-environment }}
           vercel_password: ${{ secrets.VERCEL_PREVIEW_DEPLOYMENT_PASSWORD }}
 
       - name: 🔒 Encrypt Vercel JWT
