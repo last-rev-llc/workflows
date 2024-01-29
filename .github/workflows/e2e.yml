@@ -26,6 +26,8 @@ on:
         required: false
         type: string
     secrets:
+      ENVKEY: 
+        required: false
       CYPRESS_PROJECT_ID:
         required: true
       CYPRESS_RECORD_KEY:
