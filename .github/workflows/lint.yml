@@ -23,16 +23,18 @@ jobs:
       - name: Create ESLint config
         run: |
           echo 'module.exports = {
-            parser: "@babel/eslint-parser",
-            parserOptions: {
-              babelOptions: {
-                configFile: true,
+            languageOptions: {
+              parser: "@babel/eslint-parser",
+              parserOptions: {
+                babelOptions: {
+                  configFile: true,
+                },
+                ecmaFeatures: {
+                  jsx: true,
+                },
+                ecmaVersion: 2018,
+                sourceType: "module",
               },
-              ecmaFeatures: {
-                jsx: true,
-              },
-              ecmaVersion: 2018,
-              sourceType: "module",
             },
             plugins: ["react"],
             extends: ["plugin:react/recommended"],
