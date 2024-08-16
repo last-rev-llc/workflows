@@ -10,13 +10,11 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Create temporary ESLint config
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: 'lts/*'  # Use the latest LTS version of Node.js
+
+    - name: Run ESLint to check for console logs
       run: |
-        echo 'rules:' > .eslintrc.temp.yaml
-        echo '  no-console: ["error", { "allow": ["warn", "error"] }]' >> .eslintrc.temp.yaml
-
-    - name: Run ESLint
-      run: npx eslint . --config .eslintrc.temp.yaml
-
-    - name: Cleanup temporary ESLint config
-      run: rm .eslintrc.temp.yaml
+        npx eslint . --rule 'no-console: ["error", { "allow": ["warn", "error"] }]'
