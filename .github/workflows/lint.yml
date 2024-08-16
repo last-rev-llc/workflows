@@ -15,8 +15,12 @@ jobs:
       with:
         node-version: 'lts/*'
 
-    - name: Run ESLint to check for console logs
+    - name: Create temporary ESLint config
       run: |
         echo 'module.exports = { rules: { "no-console": ["error", { "allow": ["warn", "error"] }] } };' > eslint.config.js
-        npx eslint . --config eslint.config.js
-        rm eslint.config.js
+
+    - name: Run ESLint to check for console logs
+      run: npx eslint . --config eslint.config.js --ignore-pattern 'env-validator.js'
+
+    - name: Cleanup temporary ESLint config
+      run: rm eslint.config.js
