@@ -17,4 +17,6 @@ jobs:
 
     - name: Run ESLint to check for console logs
       run: |
-        npx eslint . --no-eslintrc --rule 'no-console: ["error", { "allow": ["warn", "error"] }]'
+        echo 'module.exports = { rules: { "no-console": ["error", { "allow": ["warn", "error"] }] } };' > eslint.config.js
+        npx eslint . --config eslint.config.js
+        rm eslint.config.js
