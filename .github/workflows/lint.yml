@@ -13,8 +13,8 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: 'lts/*'  # Use the latest LTS version of Node.js
+        node-version: 'lts/*'
 
     - name: Run ESLint to check for console logs
       run: |
-        npx eslint . --rule 'no-console: ["error", { "allow": ["warn", "error"] }]'
+        npx eslint . --no-eslintrc --rule 'no-console: ["error", { "allow": ["warn", "error"] }]'
