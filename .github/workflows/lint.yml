@@ -1,25 +1,22 @@
 name: Lint Codebase
 
 on:
-  workflow_call: # This allows the workflow to be reusable
+  workflow_call:
 
 jobs:
   lint:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+    - uses: actions/checkout@v2
 
-      - name: Create temporary ESLint config
-        run: |
-          echo '{' > .eslintrc.temp.json
-          echo '  "rules": {' >> .eslintrc.temp.json
-          echo '    "no-console": ["error", { "allow": ["warn", "error"] }]' >> .eslintrc.temp.json
-          echo '  }' >> .eslintrc.temp.json
-          echo '}' >> .eslintrc.temp.json
+    - name: Create temporary ESLint config
+      run: |
+        echo 'rules:' > .eslintrc.temp.yaml
+        echo '  no-console: ["error", { "allow": ["warn", "error"] }]' >> .eslintrc.temp.yaml
 
-      - name: Run ESLint
-        run: npx eslint . --config .eslintrc.temp.json
+    - name: Run ESLint
+      run: npx eslint . --config .eslintrc.temp.yaml
 
-      - name: Cleanup temporary ESLint config
-        run: rm .eslintrc.temp.json
+    - name: Cleanup temporary ESLint config
+      run: rm .eslintrc.temp.yaml
