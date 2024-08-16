@@ -1,0 +1,44 @@
+name: Lint Codebase
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Check for .eslintrc.json
+        id: check_eslint
+        run: |
+          CONFIG_FILE=".eslintrc.json"
+
+          if [ ! -f "$CONFIG_FILE" ]; then
+            echo "ESLint configuration file ($CONFIG_FILE) not found."
+            echo "found=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          if ! jq empty "$CONFIG_FILE" > /dev/null 2>&1; then
+            echo "ESLint configuration file ($CONFIG_FILE) is not valid JSON."
+            echo "found=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          if ! grep -q '"rules"' "$CONFIG_FILE"; then
+            echo "ESLint rules not configured in $CONFIG_FILE."
+            echo "found=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "found=true" >> $GITHUB_OUTPUT
+          echo "ESLint configuration found and valid."
+
+      - name: Run ESLint
+        if: steps.check_eslint.outputs.found == 'true'
+        run: npx eslint . --ext .js,.jsx,.ts,.tsx
