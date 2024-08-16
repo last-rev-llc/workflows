@@ -1,7 +1,7 @@
 name: Lint Codebase
 
 on:
-  workflow_call:
+  workflow_call: # This allows the workflow to be reusable
 
 jobs:
   lint:
@@ -10,32 +10,16 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Check for .eslintrc.json
-        id: check_eslint
+      - name: Create temporary ESLint config
         run: |
-          CONFIG_FILE=".eslintrc.json"
-
-          if [ ! -f "$CONFIG_FILE" ]; then
-            echo "ESLint configuration file ($CONFIG_FILE) not found."
-            echo "found=false" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-
-          if ! jq empty "$CONFIG_FILE" > /dev/null 2>&1; then
-            echo "ESLint configuration file ($CONFIG_FILE) is not valid JSON."
-            echo "found=false" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-
-          if ! grep -q '"rules"' "$CONFIG_FILE"; then
-            echo "ESLint rules not configured in $CONFIG_FILE."
-            echo "found=false" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-
-          echo "found=true" >> $GITHUB_OUTPUT
-          echo "ESLint configuration found and valid."
+          echo '{' > .eslintrc.temp.json
+          echo '  "rules": {' >> .eslintrc.temp.json
+          echo '    "no-console": ["error", { "allow": ["warn", "error"] }]' >> .eslintrc.temp.json
+          echo '  }' >> .eslintrc.temp.json
+          echo '}' >> .eslintrc.temp.json
 
       - name: Run ESLint
-        if: steps.check_eslint.outputs.found == 'true'
-        run: npx eslint . --ext .js,.jsx,.ts,.tsx
+        run: npx eslint . --config .eslintrc.temp.json
+
+      - name: Cleanup temporary ESLint config
+        run: rm .eslintrc.temp.json
