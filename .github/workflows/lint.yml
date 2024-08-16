@@ -14,10 +14,34 @@ jobs:
         with:
           node-version: "latest"
 
+      # Install required dependencies
+      - name: Install dependencies
+        run: |
+          npm install -g @babel/eslint-parser eslint-plugin-react
+
       # Create ESLint config to disallow all console logs
       - name: Create ESLint config
         run: |
-          echo 'module.exports = { rules: { "no-console": "error" } };' > eslint.config.js
+          echo 'module.exports = {
+            parser: "@babel/eslint-parser",
+            parserOptions: {
+              babelOptions: {
+                configFile: true,
+              },
+              ecmaFeatures: {
+                jsx: true,
+              },
+              ecmaVersion: 2018,
+              sourceType: "module",
+            },
+            plugins: ["react"],
+            extends: ["plugin:react/recommended"],
+            rules: {
+              "no-console": "error",
+              "react/jsx-uses-react": "off",
+              "react/react-in-jsx-scope": "off",
+            },
+          };' > eslint.config.js
 
       - name: Run ESLint to check for console logs
         run: |
