@@ -15,11 +15,11 @@ jobs:
           node-version: "latest"
 
       # Create ESLint config to disallow all console logs
-      - name: Create ESLint config to disallow all console logs
+      - name: Create ESLint config
         run: |
           echo 'module.exports = { rules: { "no-console": "error" } };' > eslint.config.js
 
       - name: Run ESLint to check for console logs
         run: |
-          npx --no-deprecation eslint '**/*' --config eslint.config.js --no-eslintrc
+          npx --no-deprecation eslint '**/*' --config eslint.config.js --no-eslintrc --no-config-lookup
           rm eslint.config.js
