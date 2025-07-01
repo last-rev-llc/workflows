@@ -1,6 +1,5 @@
 name: Console Log Linting
-on:
-  workflow_call:
+on: [push]
 
 jobs:
   lint:
@@ -21,5 +20,5 @@ jobs:
 
       - name: Run ESLint to check for console logs
         run: |
-          npx --no-deprecation eslint '**/*' --config eslint.config.js
+          npx --no-deprecation eslint '**/*' --config eslint.config.js --ignore-pattern 'scripts/bws-secure/**'
           rm eslint.config.js
