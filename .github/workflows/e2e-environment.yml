@@ -108,17 +108,17 @@ jobs:
 
       ## SETUP
       - name: 🛎 Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 2
 
       - name: 🚧 Setup Node.js environment
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 16
 
       - name: 🚀 Dependencies cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
         with:
           path: |
@@ -206,7 +206,7 @@ jobs:
 
     steps:
       - name: 🛎 Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 2
 
@@ -216,7 +216,7 @@ jobs:
           node-version: "node"
 
       - name: 🚀 Dependencies cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
         with:
           path: |
@@ -291,17 +291,17 @@ jobs:
 
     steps:
       - name: 🛎 Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 2
 
       - name: 🚧 Setup Node.js environment
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 16
 
       - name: 🚀 Dependencies cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
         with:
           path: |
